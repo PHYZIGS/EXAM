@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHYZIGS Exam Portal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f0d58b; /* Light Beige background */
+            color: #4A1C40; /* Deep Maroon text */
+        }
+        header {
+            background-color: maroon; /* Deep Maroon header */
+            color: #FAF3E0; /* Light Beige text */
+            text-align: center;
+            padding: 1em 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .container {
+            max-width: 800px;
+            margin: 2em auto;
+            padding: 2em;
+            background-color: #c7805f9d; /* White background */
+            border: 2px solid #4A1C40;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        .question {
+            margin: 1em 0;
+            padding: 1em;
+            background-color: #F7E1D7;
+            border: 1px solid #4A1C40;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .options label {
+            display: block;
+            margin: 0.5em 0;
+            padding: 0.5em;
+            background-color: #d59fec;
+            border: 1px solid #4A1C40;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+        }
+        .options label:hover {
+            background-color: #FAD4C0;
+            transform: translateY(-2px);
+        }
+        .btn {
+            background-color: #4A1C40;
+            color: #FAF3E0;
+            border: none;
+            padding: 0.7em 1.5em;
+            font-size: 1em;
+            cursor: pointer;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #6A284A;
+            transform: scale(1.05);
+        }
+        .btn:active {
+            transform: scale(1);
+        }
+        .status {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5em;
+            font-size: 1em;
+            padding: 0.5em;
+            background-color: #ced1ee;
+            border: 1px solid #4A1C40;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .timer {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #2E7D32;
+            background-color: #DFF2E1;
+            padding: 0.5em;
+            border-radius: 5px;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+        }
+        .status div {
+            padding: 0.5em;
+            border-radius: 5px;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+        }
+        #attempted {
+            background-color: #0aed21; /* Green for attempted */
+        }
+        #remaining {
+            background-color: #f60606; /* White for remaining */
+        }
+        #marked {
+            background-color: #0b62ef; /* Blue for marked */
+        }
+        #question-numbers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 1.5em;
+        }
+        .question-number {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #FFFFFF;
+            border: 2px solid #4A1C40;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+        }
+        .question-number.attempted {
+            background-color: #0cf423; /* Green */
+        }
+        .question-number.marked {
+            background-color: #0560f4; /* Blue */
+        }
+        .question-number:hover {
+            transform: scale(1.1);
+        }
+        #modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        #modal-content {
+            background: #FFFFFF;
+            padding: 2em;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 50%;
+        }
+        .chart-container {
+            margin-top: 1em;
+        }
+        canvas {
+            width: 100%;
+            height: auto;
+        }
+        #start-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #start-modal-content {
+            background: #FFFFFF;
+            padding: 2em;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 50%;
+        }
+        #start-modal-content p {
+            margin-bottom: 1em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>PHYZIGS Exam Portal</h1>
+    </header>
+    
+    <!-- Start Exam Modal -->
+    <div id="start-modal">
+        <div id="start-modal-content">
+            <h2>Instructions</h2>
+            <p>Welcome to the online exam! Please read the following instructions carefully before starting:</p>
+            <ul>
+                <li>The exam consists of multiple-choice questions (MCQs).</li>
+                <li>You will have 10 minutes to complete the exam.</li>
+                <li>You can navigate between questions using the "Next" button.</li>
+                <li>If you wish to mark a question for later review, click "Mark for Later".</li>
+                <li>Once you finish the exam, click "Submit" to view your results.</li>
+            </ul>
+            <p>The exam will be available from 4:30 PM onwards. The Start Exam button will be enabled then.</p>
+            <button class="btn" id="start-exam-btn" disabled>Start Exam</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="topic-heading">Sample Exam Topic</div>
+        <div class="status">
+            <div>Attempted: <span id="attempted">0</span></div>
+            <div>Remaining: <span id="remaining">3</span></div>
+            <div>Marked for Later: <span id="marked">0</span></div>
+            <div class="timer">Time Left: <span id="timer">10:00</span></div>
+        </div>
+        <div id="question-numbers">
+            <div class="question-number" data-question="1">1</div>
+            <div class="question-number" data-question="2">2</div>
+            <div class="question-number" data-question="3">3</div>
+        </div>
+        <div id="question-container">
+            <div class="question" data-question="1">
+                <h3>1. What is the capital of France?</h3>
+                <div class="options">
+                    <label><input type="radio" name="q1" value="Paris"> Paris</label>
+                    <label><input type="radio" name="q1" value="London"> London</label>
+                    <label><input type="radio" name="q1" value="Rome"> Rome</label>
+                </div>
+            </div>
+            <div class="question" data-question="2" style="display: none;">
+                <h3>2. What is 2 + 2?</h3>
+                <div class="options">
+                    <label><input type="radio" name="q2" value="3"> 3</label>
+                    <label><input type="radio" name="q2" value="4"> 4</label>
+                    <label><input type="radio" name="q2" value="5"> 5</label>
+                </div>
+            </div>
+            <div class="question" data-question="3" style="display: none;">
+                <h3>3. What is the chemical symbol for water?</h3>
+                <div class="options">
+                    <label><input type="radio" name="q3" value="H2O"> H2O</label>
+                    <label><input type="radio" name="q3" value="CO2"> CO2</label>
+                    <label><input type="radio" name="q3" value="O2"> O2</label>
+                </div>
+            </div>
+        </div>
+        <button class="btn" id="next-btn">Next</button>
+        <button class="btn" id="mark-btn">Mark for Later</button>
+        <button class="btn" id="submit-btn" style="display: none;">Submit</button>
+    </div>
+
+    <div id="modal">
+        <div id="modal-content">
+            <h2>Exam Analysis</h2>
+            <p>Your score: <span id="final-score">0</span> / 3</p>
+            <p>Correct Answers: <span id="correct-answers">0</span></p>
+            <p>Incorrect Answers: <span id="incorrect-answers">0</span></p>
+            <div class="chart-container">
+                <canvas id="pieChart"></canvas>
+            </div>
+            <button class="btn" onclick="endExam()">End Exam</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let currentQuestion = 1;
+        const totalQuestions = 3;
+        const markedQuestions = new Set();
+        const timerElement = document.getElementById('timer');
+        const attemptedElement = document.getElementById('attempted');
+        const remainingElement = document.getElementById('remaining');
+        const markedElement = document.getElementById('marked');
+        
+        // Get the target start time (4:30 PM)
+        const targetStartTime = new Date();
+        targetStartTime.setHours(16, 30, 0, 0); // 4:30 PM today
+
+        function updateStatus() {
+            const attempted = document.querySelectorAll('input:checked').length;
+            attemptedElement.textContent = attempted;
+            remainingElement.textContent = totalQuestions - attempted - markedQuestions.size;
+            markedElement.textContent = markedQuestions.size;
+
+            document.querySelectorAll('.question-number').forEach(el => {
+                const qNumber = el.dataset.question;
+                const isAttempted = document.querySelector(`input[name="q${qNumber}"]:checked`);
+
+                if (isAttempted) {
+                    el.classList.add('attempted');
+                    el.classList.remove('marked');
+                } else if (markedQuestions.has(Number(qNumber))) {
+                    el.classList.add('marked');
+                    el.classList.remove('attempted');
+                } else {
+                    el.classList.remove('attempted', 'marked');
+                }
+            });
+        }
+
+        function startTimer(duration) {
+            let remainingTime = duration;
+            const interval = setInterval(() => {
+                let minutes = Math.floor(remainingTime / 60);
+                let seconds = remainingTime % 60;
+                if (seconds < 10) seconds = `0${seconds}`;
+                timerElement.textContent = `${minutes}:${seconds}`;
+
+                if (remainingTime <= 0) {
+                    clearInterval(interval);
+                    endExam();
+                }
+                remainingTime--;
+            }, 1000);
+        }
+
+        function showQuestion(qNumber) {
+            document.querySelectorAll('.question').forEach(q => q.style.display = 'none');
+            document.querySelector(`.question[data-question="${qNumber}"]`).style.display = 'block';
+
+            // Show Submit Button only on the last question
+            if (qNumber === totalQuestions) {
+                document.getElementById('submit-btn').style.display = 'inline-block';
+                document.getElementById('next-btn').style.display = 'none'; // Hide next button on the last question
+            } else {
+                document.getElementById('submit-btn').style.display = 'none';
+                document.getElementById('next-btn').style.display = 'inline-block'; // Show next button for other questions
+            }
+        }
+
+        function endExam() {
+            const correctAnswers = document.querySelectorAll('input:checked').length;
+            const incorrectAnswers = totalQuestions - correctAnswers;
+            document.getElementById('final-score').textContent = correctAnswers;
+            document.getElementById('correct-answers').textContent = correctAnswers;
+            document.getElementById('incorrect-answers').textContent = incorrectAnswers;
+
+            const ctx = document.getElementById('pieChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Correct Answers', 'Incorrect Answers'],
+                    datasets: [{
+                        data: [correctAnswers, incorrectAnswers],
+                        backgroundColor: ['#0CF423', '#F60606'],
+                    }],
+                },
+            });
+
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        document.getElementById('start-exam-btn').addEventListener('click', () => {
+            document.getElementById('start-modal').style.display = 'none';
+            startTimer(10 * 60); // 10 minutes countdown
+            showQuestion(currentQuestion);
+        });
+
+        document.getElementById('next-btn').addEventListener('click', () => {
+            if (currentQuestion < totalQuestions) {
+                currentQuestion++;
+                showQuestion(currentQuestion);
+            }
+            updateStatus();
+        });
+
+        document.getElementById('mark-btn').addEventListener('click', () => {
+            markedQuestions.add(currentQuestion);
+            updateStatus();
+        });
+
+        document.getElementById('submit-btn').addEventListener('click', () => {
+            endExam();
+        });
+
+        document.querySelectorAll('.question-number').forEach(el => {
+            el.addEventListener('click', () => {
+                currentQuestion = Number(el.dataset.question);
+                showQuestion(currentQuestion);
+            });
+        });
+
+        setInterval(() => {
+            const now = new Date();
+            if (now >= targetStartTime) {
+                document.getElementById('start-exam-btn').disabled = false;
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
