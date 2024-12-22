@@ -72,7 +72,7 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 1.5em;
-            font-size: 0.9em;
+            font-size: 0.7em;
             padding: 0.5em;
             background-color: #ced1ee;
             border: 1px solid #4A1C40;
@@ -81,7 +81,7 @@
         }
         .timer {
             font-weight: bold;
-            font-size: 0.9em;
+            font-size: 0.7em;
             color: #2E7D32;
             background-color: #DFF2E1;
             padding: 0.5em;
@@ -191,7 +191,6 @@
             <h2>Instructions</h2>
             <p>Welcome to the online exam! Please read the following instructions carefully before starting:</p>
             <ul>
-               
                 <li>You will have 10 minutes to complete the exam.</li>
                 <li>If you wish to mark a question for later review, click "Mark for Later".</li>
                 <li>Once you finish the exam, click "Submit" to view your results.</li>
@@ -200,7 +199,7 @@
             <button class="btn" id="start-exam-btn" disabled>Start Exam</button>
         </div>
     </div>
-
+    
     <div class="container">
         <div class="topic-heading">Sample Exam Topic</div>
         <div class="status">
@@ -244,7 +243,7 @@
         <button class="btn" id="mark-btn">Mark for Later</button>
         <button class="btn" id="submit-btn" style="display: none;">Submit</button>
     </div>
-
+    
     <div id="modal">
         <div id="modal-content">
             <h2>Exam Analysis</h2>
@@ -257,7 +256,7 @@
             <button class="btn" onclick="endExam()">End Exam</button>
         </div>
     </div>
-
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         let currentQuestion = 1;
@@ -268,20 +267,26 @@
         const remainingElement = document.getElementById('remaining');
         const markedElement = document.getElementById('marked');
         
+        const correctAnswers = {
+            1: 'Paris',  // Correct answer for question 1
+            2: '4',      // Correct answer for question 2
+            3: 'H2O'     // Correct answer for question 3
+        };
+    
         // Get the target start time (4:30 PM)
         const targetStartTime = new Date();
-        targetStartTime.setHours(16, 30, 0, 0); // 4:30 PM today
-
+        targetStartTime.setHours(6, 30, 0, 0); // 4:30 PM today
+    
         function updateStatus() {
             const attempted = document.querySelectorAll('input:checked').length;
             attemptedElement.textContent = attempted;
             remainingElement.textContent = totalQuestions - attempted - markedQuestions.size;
             markedElement.textContent = markedQuestions.size;
-
+    
             document.querySelectorAll('.question-number').forEach(el => {
                 const qNumber = el.dataset.question;
                 const isAttempted = document.querySelector(`input[name="q${qNumber}"]:checked`);
-
+    
                 if (isAttempted) {
                     el.classList.add('attempted');
                     el.classList.remove('marked');
@@ -293,7 +298,7 @@
                 }
             });
         }
-
+    
         function startTimer(duration) {
             let remainingTime = duration;
             const interval = setInterval(() => {
@@ -301,7 +306,7 @@
                 let seconds = remainingTime % 60;
                 if (seconds < 10) seconds = `0${seconds}`;
                 timerElement.textContent = `${minutes}:${seconds}`;
-
+    
                 if (remainingTime <= 0) {
                     clearInterval(interval);
                     endExam();
@@ -309,11 +314,11 @@
                 remainingTime--;
             }, 1000);
         }
-
+    
         function showQuestion(qNumber) {
             document.querySelectorAll('.question').forEach(q => q.style.display = 'none');
             document.querySelector(`.question[data-question="${qNumber}"]`).style.display = 'block';
-
+    
             // Show Submit Button only on the last question
             if (qNumber === totalQuestions) {
                 document.getElementById('submit-btn').style.display = 'inline-block';
@@ -323,35 +328,50 @@
                 document.getElementById('next-btn').style.display = 'inline-block'; // Show next button for other questions
             }
         }
-
+    
         function endExam() {
-            const correctAnswers = document.querySelectorAll('input:checked').length;
-            const incorrectAnswers = totalQuestions - correctAnswers;
-            document.getElementById('final-score').textContent = correctAnswers;
-            document.getElementById('correct-answers').textContent = correctAnswers;
-            document.getElementById('incorrect-answers').textContent = incorrectAnswers;
-
+            let correctCount = 0;
+            let incorrectCount = 0;
+    
+            // Check the answers
+            for (let i = 1; i <= totalQuestions; i++) {
+                const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+                if (selectedOption && selectedOption.value === correctAnswers[i]) {
+                    correctCount++;
+                } else {
+                    incorrectCount++;
+                }
+            }
+    
+            // Calculate percentages
+            const correctPercentage = ((correctCount / totalQuestions) * 100).toFixed(2);
+            const incorrectPercentage = ((incorrectCount / totalQuestions) * 100).toFixed(2);
+    
+            document.getElementById('final-score').textContent = `${correctCount} / ${totalQuestions}`;
+            document.getElementById('correct-answers').textContent = correctCount;
+            document.getElementById('incorrect-answers').textContent = incorrectCount;
+    
             const ctx = document.getElementById('pieChart').getContext('2d');
             new Chart(ctx, {
                 type: 'pie',
                 data: {
                     labels: ['Correct Answers', 'Incorrect Answers'],
                     datasets: [{
-                        data: [correctAnswers, incorrectAnswers],
+                        data: [correctCount, incorrectCount],
                         backgroundColor: ['#0CF423', '#F60606'],
                     }],
                 },
             });
-
+    
             document.getElementById('modal').style.display = 'flex';
         }
-
+    
         document.getElementById('start-exam-btn').addEventListener('click', () => {
             document.getElementById('start-modal').style.display = 'none';
             startTimer(10 * 60); // 10 minutes countdown
             showQuestion(currentQuestion);
         });
-
+    
         document.getElementById('next-btn').addEventListener('click', () => {
             if (currentQuestion < totalQuestions) {
                 currentQuestion++;
@@ -359,23 +379,23 @@
             }
             updateStatus();
         });
-
+    
         document.getElementById('mark-btn').addEventListener('click', () => {
             markedQuestions.add(currentQuestion);
             updateStatus();
         });
-
+    
         document.getElementById('submit-btn').addEventListener('click', () => {
             endExam();
         });
-
+    
         document.querySelectorAll('.question-number').forEach(el => {
             el.addEventListener('click', () => {
                 currentQuestion = Number(el.dataset.question);
                 showQuestion(currentQuestion);
             });
         });
-
+    
         setInterval(() => {
             const now = new Date();
             if (now >= targetStartTime) {
@@ -383,5 +403,6 @@
             }
         }, 1000);
     </script>
-</body>
+    </body>
+    
 </html>
